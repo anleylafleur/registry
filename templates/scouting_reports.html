@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                {% if edit_report %}Edit Scouting Report{% else %}Add Scouting Report{% endif %}
+            </div>
+
+            <div class="card-body">
+
+                {% if edit_report %}
+                <form method="POST" action="{{ url_for('update_scouting_report', report_id=edit_report.ScoutingReportID) }}">
+                {% else %}
+                <form method="POST" action="{{ url_for('add_scouting_report') }}">
+                {% endif %}
+
+                    <div class="mb-2">
+                        <label class="form-label">Player</label>
+                        <select class="form-select" name="PlayerID" required>
+                            <option value="">Select Player</option>
+                            {% for p in players %}
+                            <option value="{{ p.PlayerID }}"
+                                {% if edit_report and edit_report.PlayerID == p.PlayerID %}selected{% endif %}>
+                                {{ p.PlayerName }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Scout</label>
+                        <select class="form-select" name="ScoutID">
+                            <option value="">Select Scout</option>
+                            {% for s in scouts %}
+                            <option value="{{ s.ScoutID }}"
+                                {% if edit_report and edit_report.ScoutID == s.ScoutID %}selected{% endif %}>
+                                {{ s.ScoutName }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Report Date</label>
+                        <input 
+                            type="date" 
+                            class="form-control" 
+                            name="ReportDate" 
+                            required
+                            value="{{ edit_report.ReportDate if edit_report else '' }}">
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <label class="form-label">Technical</label>
+                            <input type="number" min="1" max="10" class="form-control" name="TechnicalRating"
+                                value="{{ edit_report.TechnicalRating if edit_report else '' }}">
+                        </div>
+
+                        <div class="col">
+                            <label class="form-label">Tactical</label>
+                            <input type="number" min="1" max="10" class="form-control" name="TacticalRating"
+                                value="{{ edit_report.TacticalRating if edit_report else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col">
+                            <label class="form-label">Physical</label>
+                            <input type="number" min="1" max="10" class="form-control" name="PhysicalRating"
+                                value="{{ edit_report.PhysicalRating if edit_report else '' }}">
+                        </div>
+
+                        <div class="col">
+                            <label class="form-label">Mental</label>
+                            <input type="number" min="1" max="10" class="form-control" name="MentalRating"
+                                value="{{ edit_report.MentalRating if edit_report else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-2 mt-2">
+                        <label class="form-label">Overall Rating</label>
+                        <input type="number" min="1" max="10" class="form-control" name="OverallRating"
+                            value="{{ edit_report.OverallRating if edit_report else '' }}">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Strengths</label>
+                        <textarea class="form-control" name="Strengths" rows="2">{{ edit_report.Strengths if edit_report else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Weaknesses</label>
+                        <textarea class="form-control" name="Weaknesses" rows="2">{{ edit_report.Weaknesses if edit_report else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Development Notes</label>
+                        <textarea class="form-control" name="DevelopmentNotes" rows="3">{{ edit_report.DevelopmentNotes if edit_report else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Recommendation</label>
+                        <select class="form-select" name="Recommendation">
+                            <option value="">Select</option>
+                            {% for r in ["Monitor", "Trial", "Sign", "Develop", "Release", "High Potential"] %}
+                            <option value="{{ r }}"
+                                {% if edit_report and edit_report.Recommendation == r %}selected{% endif %}>
+                                {{ r }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button class="btn btn-success mt-2" type="submit">
+                        {% if edit_report %}Update{% else %}Add{% endif %}
+                    </button>
+
+                    {% if edit_report %}
+                    <a href="{{ url_for('scouting_reports') }}" class="btn btn-secondary mt-2">Cancel</a>
+                    {% endif %}
+
+                </form>
+
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                Upload Scouting Reports
+            </div>
+
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('upload_scouting_reports') }}" enctype="multipart/form-data">
+                    <input type="file" name="file" class="form-control mb-3" accept=".csv,.xlsx" required>
+                    <button class="btn btn-dark" type="submit">Upload</button>
+                </form>
+
+                <hr>
+
+                <small class="text-muted">
+                    Required columns:<br>
+                    PlayerID, ReportDate, TechnicalRating, TacticalRating,
+                    PhysicalRating, MentalRating, OverallRating<br><br>
+
+                    Optional columns:<br>
+                    ScoutID, Strengths, Weaknesses, DevelopmentNotes, Recommendation
+                </small>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Player Scouting Reports
+            </div>
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Player</th>
+                            <th>Scout</th>
+                            <th>Date</th>
+                            <th>Tech</th>
+                            <th>Tact</th>
+                            <th>Phys</th>
+                            <th>Mental</th>
+                            <th>Overall</th>
+                            <th>Recommendation</th>
+                            <th style="width:150px;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for r in reports %}
+                        <tr>
+                            <td>{{ r.ScoutingReportID }}</td>
+                            <td>{{ r.PlayerName }}</td>
+                            <td>{{ r.ScoutName or '' }}</td>
+                            <td>{{ r.ReportDate }}</td>
+                            <td>{{ r.TechnicalRating or '' }}</td>
+                            <td>{{ r.TacticalRating or '' }}</td>
+                            <td>{{ r.PhysicalRating or '' }}</td>
+                            <td>{{ r.MentalRating or '' }}</td>
+                            <td>
+                                <span class="badge bg-success">
+                                    {{ r.OverallRating or '' }}
+                                </span>
+                            </td>
+                            <td>{{ r.Recommendation or '' }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_scouting_report', report_id=r.ScoutingReportID) }}" 
+                                   class="btn btn-sm btn-warning">
+                                   Edit
+                                </a>
+
+                                <form method="POST" 
+                                      action="{{ url_for('delete_scouting_report', report_id=r.ScoutingReportID) }}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('Delete this scouting report?');">
+                                    <button class="btn btn-sm btn-danger" type="submit">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">
+                                No scouting reports found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
