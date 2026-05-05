@@ -2,7 +2,7 @@ import pyodbc
 
 def get_connection():
     conn_str = (
-        "DRIVER={ODBC Driver 18 for SQL Server};"
+        "DRIVER={ODBC Driver 17 for SQL Server};"
         "SERVER=localhost;"
         "DATABASE=SoccerRegistryDB;"
         "Trusted_Connection=yes;"
