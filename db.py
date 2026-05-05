@@ -10,10 +10,10 @@ def get_connection():
 
     conn_str = (
         f"DRIVER={{{driver}}};"
-        f"SERVER=tcp:{soccerregistry},1433;"
-        f"DATABASE={SoccerRegistryDB};"
-        f"UID={anleylafleur@hotmail.com};"
-        f"PWD={#Champ195472};"
+        f"SERVER=tcp:{server},1433;"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password};"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
         "Connection Timeout=60;"
