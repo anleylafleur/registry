@@ -833,5 +833,17 @@ def upload_scouting_reports():
 
     return redirect(url_for("scouting_reports"))
 
+@app.route("/db-test")
+def db_test():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT DB_NAME()")
+        db_name = cursor.fetchone()[0]
+        conn.close()
+        return f"Connected to database: {db_name}"
+    except Exception as e:
+        return f"DB connection failed: {str(e)}", 500
+
 if __name__ == "__main__":
     app.run(debug=True)
